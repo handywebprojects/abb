@@ -1,0 +1,7 @@
+
+/firebase/*
+
+/.vscode/*
+
+*.exe
+*.bat
