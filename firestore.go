@@ -61,4 +61,8 @@ func Listbooks(){
 	}
 }
 
+func StoreBook(b Book){
+	bookcoll.Doc(b.Id()).Set(ctx, b.Serialize())
+}
+
 ////////////////////////////////////////////////////////////////
