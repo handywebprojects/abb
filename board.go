@@ -17,8 +17,10 @@ const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 ////////////////////////////////////////////////////////////////
 
 func init(){
-	fmt.Println("--> initializing board")
-	fmt.Println("--> board initialized")
+	if false{
+		fmt.Println("--> initializing board")
+		fmt.Println("--> board initialized")
+	}	
 }
 
 ////////////////////////////////////////////////////////////////
@@ -36,10 +38,19 @@ func (p Piece) Tostring() string{
 }
 
 type Board struct{
+	Variantkey string
 	Rep []Piece
 	Turnfen string
 	Castlefen string
 	Epfen string
+}
+
+func NewBoard(variantkey string) Board{
+	b := Board{
+		Variantkey: variantkey,
+	}
+	b.Setfromfen(START_FEN)
+	return b
 }
 
 func (b Board) Tostring() string{
@@ -53,7 +64,7 @@ func (b Board) Tostring() string{
 		rows = append(rows, strings.Join(row, " "))
 	}
 	posrep := strings.Join(rows, "\n")
-	posrep += fmt.Sprintf("\n\n%s %s %s", b.Turnfen, b.Castlefen, b.Epfen)
+	posrep += fmt.Sprintf("\n[ %s ] %s %s %s", b.Variantkey, b.Turnfen, b.Castlefen, b.Epfen)
 	return posrep
 }
 

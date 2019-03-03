@@ -13,8 +13,10 @@ import(
 ////////////////////////////////////////////////////////////////
 
 func init(){
-	fmt.Println("--> initializing utils")
-	fmt.Println("--> utils initialized")
+	if false{
+		fmt.Println("--> initializing utils")
+		fmt.Println("--> utils initialized")
+	}	
 }
 
 ////////////////////////////////////////////////////////////////
