@@ -7,10 +7,6 @@ import(
 )
 
 func main(){
-	b := abb.Board{}
-	b.Setfromfen(abb.START_FEN)
-	fmt.Println(b.Tostring())
-	b.Makealgebmove("f7f4")
-	b.Makealgebmove("e2e4")
-	fmt.Println(b.Tostring())
+	fmt.Println("abb - Auto Book Builder")
+	abb.Listbooks()
 }

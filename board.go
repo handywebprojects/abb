@@ -16,6 +16,13 @@ const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 ////////////////////////////////////////////////////////////////
 
+func init(){
+	fmt.Println("--> initializing board")
+	fmt.Println("--> board initialized")
+}
+
+////////////////////////////////////////////////////////////////
+
 type Piece struct{
 	Kind string
 	Color int
