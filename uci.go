@@ -16,6 +16,7 @@ import (
 	"text/scanner"
 	"math"
 	"math/rand"
+	"time"
 )
 
 ////////////////////////////////////////////////////////////////
@@ -163,7 +164,7 @@ func (eng *Engine) SetFEN(fen string) error {
 
 // Go can use search moves, depth and time to move as filter  for the results being returned.
 // see http://wbec-ridderkerk.nl/html/UCIProtocol.html
-func (eng *Engine) Go(depth int, searchmoves string, movetime int64, resultOpts ...uint) (*Results, error) {
+func (eng *Engine) Go(depth int, searchmoves string, movetime int, resultOpts ...uint) (*Results, error) {
 	res := Results{}
 	resultOpt := uint(0)
 	if len(resultOpts) == 1 {
@@ -462,6 +463,68 @@ func (b Book) Addone() string{
 		b.StorePosition(p)
 		return fen
 	}	
+}
+
+////////////////////////////////////////////////////////////////
+
+func (b *Book) Minimaxrecursive(fen string, line []string, posids []string, depth int, maxdepth int, seldepth int, nodes int, cutoff int) (int, int, int){
+	//fmt.Println("minimax", fen, line, posids, depth, maxdepth)
+	max := -INF_SCORE
+	// max depth exceeded
+	if depth > maxdepth{		
+		return 2 * max, seldepth, nodes
+	}
+	posid := Fen2posid(fen)
+	// repetition
+	for _, testposid := range posids{
+		if testposid == posid{
+			return 0, seldepth, nodes	
+		}
+	}
+	newposids := append(posids, posid)
+	// check if position is found
+	p, ok := b.Poscache[posid]	
+	if !ok{		
+		return 2 * max, seldepth, nodes
+	}	
+	if depth > seldepth{
+		seldepth = depth
+	}
+	nodes += 1
+	for _, mi := range p.Getmovelist().Items{		
+		// cutoff
+		algeb := mi.Algeb
+		value := mi.Score
+		if ( mi.Score >= -cutoff ) && ( mi.Score <= cutoff ){
+			newfen := b.Makealgebmove(algeb, fen)
+			value, seldepth, nodes = b.Minimaxrecursive(newfen, append(line, algeb), newposids, depth + 1, maxdepth, seldepth, nodes, cutoff)			
+		}
+		// failed node
+		if value < -INF_SCORE{
+			value = mi.Score
+		}
+		// don't overwrite eval of low depth nodes
+		if depth < mi.Minimaxdepth{
+			p.Moves[algeb] = BookMove{algeb, mi.Score, value, depth, false}
+		}			
+		if depth == 0{
+			fmt.Println(algeb, mi.Score, value)	
+		}		
+		if value > max{
+			max = value
+		}
+	}
+	return -max, seldepth, nodes
+}
+
+func (b *Book) Minimaxout(){
+	start := time.Now()
+	fmt.Println("minimaxing out", b.Fullname())	
+	value, seldepth, nodes := b.Minimaxrecursive(b.Rootfen, []string{}, []string{}, 0, b.Analysisdepth, 0, 0, b.Cutoff)
+	fmt.Println("minimax done", -value, seldepth, nodes)
+	elapsed := time.Since(start)
+	fmt.Println("minimaxing done", b.Fullname(), "took", elapsed, "rate", float32(nodes) / float32(elapsed) * 1e9)
+	b.Uploadcache()		
 }
 
 ////////////////////////////////////////////////////////////////

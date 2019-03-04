@@ -14,4 +14,5 @@ func main(){
 	abb.Listbooks()
 	b.Synccache()
 	b.Addone()
+	b.Minimaxout()
 }

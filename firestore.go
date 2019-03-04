@@ -7,6 +7,7 @@ package abb
 import (
 	"fmt"	
 	"context"		
+	"time"
 
 	firebase "firebase.google.com/go"
 	"google.golang.org/api/iterator"
@@ -77,7 +78,10 @@ func StoreBookPosition(b Book, p BookPosition){
 }
 
 func Synccache(b *Book){
+	start := time.Now()
+	fmt.Println("syncing cache", b.Fullname())	
 	b.Poscache = make(map[string]BookPosition)
+	numpos := 0
 	iter := bookcoll.Doc(b.Id()).Collection("booklets").Documents(ctx)
 	for {
 		doc, err := iter.Next()
@@ -93,8 +97,23 @@ func Synccache(b *Book){
 			blob := pdoc.Data()["blob"].(string)
 			p := BookPositionFromBlob(blob)
 			b.Poscache[p.Posid()] = p
+			numpos++
 		}
 	}
+	elapsed := time.Since(start)
+	fmt.Println("syncing cache done", b.Fullname(), "positions", numpos, "took", elapsed)
+}
+
+func Uploadcache(b Book){
+	start := time.Now()
+	fmt.Println("uploading cache", b.Fullname())	
+	numpos := 0
+	for _, p := range(b.Poscache){
+		StoreBookPosition(b, p)
+		numpos++
+	}
+	elapsed := time.Since(start)
+	fmt.Println("uploading cache done", b.Fullname(), "positions", numpos, "took", elapsed)
 }
 
 ////////////////////////////////////////////////////////////////

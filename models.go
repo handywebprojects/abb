@@ -130,6 +130,10 @@ func (b *Book) Synccache(){
 	Synccache(b)
 }
 
+func (b Book) Uploadcache(){
+	Uploadcache(b)
+}
+
 func (b Book) Id() string{
 	return fmt.Sprintf("%s%s", b.Name, b.Variantkey)
 }
