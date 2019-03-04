@@ -62,6 +62,18 @@ func Fen2bookletindex(fen string, mod int) int{
 	return sum % mod
 }
 
+func Bookletid(fen string, mod int) string{
+	return fmt.Sprintf("booklet%d", Fen2bookletindex(fen, mod))
+}
+
+func Fen2posid(fen string) string{	
+	parts := strings.Split(fen, " ")
+	rawfenparts := strings.Split(parts[0], "/")
+	rawfen := strings.Join(rawfenparts, "")
+	posid := rawfen + parts[1] + parts[2] + parts[3]
+	return posid
+}
+
 ////////////////////////////////////////////////////////////////
 
 func Intarray2str(intarray []int) string{
@@ -80,6 +92,28 @@ func Str2intarray(str string) []int{
 		intarray = append(intarray, value)
 	}
 	return intarray
+}
+
+func str2int(str string, defaultvalue int) int{
+	value, err := strconv.Atoi(str)
+	if err != nil{
+		return defaultvalue
+	}
+	return value
+}
+
+func bool2int(b bool) int{
+	if b{
+		return 1
+	}
+	return 0
+}
+
+func int2bool(i int) bool{
+	if i == 1{
+		return true
+	}
+	return false
 }
 
 ////////////////////////////////////////////////////////////////

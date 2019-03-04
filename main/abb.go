@@ -6,10 +6,13 @@ import(
 	"github.com/handywebprojects/abb"
 )
 
-func main(){
-	fmt.Println("abb - Auto Book Builder")	
-	//fmt.Println(abb.NewBoard("atomic").Tostring())
-	b := abb.NewBook()
-	b.Store()
+func main(){		
+	fmt.Println("abb - Auto Book Builder")		
+	b := abb.NewBook()	
+	b.Enginedepth = 5
+	b.Store()	
 	abb.Listbooks()
+	p := b.Analyze(abb.START_FEN)
+	b.StorePosition(p)
+	fmt.Print(p)
 }

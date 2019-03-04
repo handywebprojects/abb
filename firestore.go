@@ -61,8 +61,19 @@ func Listbooks(){
 	}
 }
 
-func StoreBook(b Book){
-	bookcoll.Doc(b.Id()).Set(ctx, b.Serialize())
+func StoreBook(b Book){	
+	bd := bookcoll.Doc(b.Id())
+	b.Booklets = bd.Collection("booklets")
+	bd.Set(ctx, b.Serialize())
+}
+
+func StoreBookPosition(b Book, p BookPosition){
+	bd := bookcoll.Doc(b.Id()).Collection("booklets").Doc(b.Bookletid(p.Fen))
+	pc := bd.Collection("positions")
+	bd.Set(ctx, map[string]interface{}{
+		"positions": pc,
+	})
+	pc.Doc(p.Posid()).Set(ctx, p.Serialize())
 }
 
 ////////////////////////////////////////////////////////////////

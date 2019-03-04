@@ -1,6 +1,10 @@
+////////////////////////////////////////////////////////////////
+
 package abb
 
-import (
+////////////////////////////////////////////////////////////////
+
+import (	
 	"bufio"
 	"encoding/json"
 	"fmt"
@@ -10,7 +14,10 @@ import (
 	"strconv"
 	"strings"
 	"text/scanner"
+	"math"
 )
+
+////////////////////////////////////////////////////////////////
 
 // constants for result filtering
 const (
@@ -349,4 +356,63 @@ func (eng *Engine) Close() {
 		log.Println("failed to kill engine:", err)
 	}
 	eng.cmd.Wait()
+}
+
+////////////////////////////////////////////////////////////////
+
+var eng *Engine
+
+////////////////////////////////////////////////////////////////
+
+const INF_SCORE = 10000
+const MATE_SCORE = 9000
+
+////////////////////////////////////////////////////////////////
+
+func init(){
+	fmt.Println("--> initializing engine")
+	eng, _ = NewEngine("engines/stockfish9")
+	fmt.Println("--> engine initialized")
+}
+
+////////////////////////////////////////////////////////////////
+
+func Analyze(fen string, depth int, variantkey string) BookPosition {
+	eng.SetOptions(Options{
+		UCI_Variant:variantkey,
+		Hash:64,
+		Threads:1,
+		MultiPV:250,		
+	})
+
+	eng.SetFEN(fen)
+	
+	resultOpts := HighestDepthOnly
+	results, _ := eng.GoDepth(depth, resultOpts)
+
+	moves := results.Results
+	p := NewPosition(fen)
+	for _, move := range(moves){		
+		score := move.Score
+		depth := move.Depth
+		p.Enginedepth = depth
+		if move.Mate{
+			if score < 0{
+				score = -INF_SCORE - score
+			}else{
+				score = INF_SCORE - score
+			}
+		}else if math.Abs(float64(score)) > MATE_SCORE{
+			if score < 0{
+				score = -MATE_SCORE
+			}else{
+				score = MATE_SCORE
+			}
+		}		
+		algeb := move.BestMoves[0]
+		m := BookMove{algeb, score, score, INFINITE_MINIMAX_DEPTH, false}
+		p.Moves[algeb] = m
+	}
+
+	return p
 }
