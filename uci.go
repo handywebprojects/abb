@@ -502,18 +502,22 @@ func (b *Book) Minimaxrecursive(fen string, line []string, posids []string, dept
 	for _, mi := range p.Getmovelist().Items{		
 		// cutoff
 		algeb := mi.Algeb
-		value := mi.Score
+		value := mi.Score		
+		haspv := false
 		if ( mi.Score >= -cutoff ) && ( mi.Score <= cutoff ){
 			newfen := b.Makealgebmove(algeb, fen)
 			value, seldepth, nodes = b.Minimaxrecursive(newfen, append(line, algeb), newposids, depth + 1, maxdepth, seldepth, nodes, cutoff)			
+			if value >= -INF_SCORE{
+				haspv = true
+			}
 		}
 		// failed node
 		if value < -INF_SCORE{
 			value = mi.Score
 		}
 		// don't overwrite eval of low depth nodes
-		if depth < mi.Minimaxdepth{
-			p.Moves[algeb] = BookMove{algeb, mi.Score, value, depth, false}
+		if depth < mi.Minimaxdepth{			
+			p.Moves[algeb] = BookMove{algeb, mi.Score, value, depth, haspv}			
 		}			
 		if depth == 0{
 			fmt.Println(algeb, mi.Score, value)	

@@ -12,7 +12,7 @@ func main(){
 	b := abb.NewBook()		
 	b.Store()	
 	abb.Listbooks()
-	b.Synccache()
+	b.Synccache()	
 	for i:=0; i<b.Numcycles; i++{
 		fmt.Println(abb.SEP)
 		fmt.Println("build cycle", i+1, "of", b.Numcycles)

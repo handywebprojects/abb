@@ -71,6 +71,7 @@ func (p BookPosition) Posid() string{
 func (p BookPosition) Getmovelist() Movelist{
 	movelist := make([]BookMove, 0)
 	for _, move := range(p.Moves){
+		move.Minimaxdepth = INFINITE_MINIMAX_DEPTH
 		movelist = append(movelist, move)
 	}
 	ml := Movelist{movelist}
@@ -193,8 +194,7 @@ func (b Book) Analyze(fen string) BookPosition{
 }
 
 func (b Book) StorePosition(p BookPosition){
-	b.Poscache[p.Posid()] = p
-	StoreBookPosition(b, p)
+	b.Poscache[p.Posid()] = p	
 }
 
 ////////////////////////////////////////////////////////////////
