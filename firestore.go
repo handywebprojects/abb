@@ -79,7 +79,9 @@ func StoreBookPosition(b Book, p BookPosition){
 
 func Synccache(b *Book){
 	start := time.Now()
+	fmt.Println(SEP)
 	fmt.Println("syncing cache", b.Fullname())	
+	fmt.Println(SEP)
 	b.Poscache = make(map[string]BookPosition)
 	numpos := 0
 	iter := bookcoll.Doc(b.Id()).Collection("booklets").Documents(ctx)
@@ -89,6 +91,7 @@ func Synccache(b *Book){
 			break
 		}
 		piter := doc.Ref.Collection("positions").Documents(ctx)
+		fmt.Println("syncing", doc.Ref.ID, b.Fullname())
 		for {
 			pdoc, perr := piter.Next()
 			if perr == iterator.Done {
@@ -106,11 +109,27 @@ func Synccache(b *Book){
 
 func Uploadcache(b Book){
 	start := time.Now()
+	fmt.Println(SEP)
 	fmt.Println("uploading cache", b.Fullname())	
+	fmt.Println(SEP)
 	numpos := 0
-	for _, p := range(b.Poscache){
-		StoreBookPosition(b, p)
+	booklets := make(map[string]map[string]interface{})
+	for _, p := range(b.Poscache){		
+		bid := b.Bookletid(p.Fen)
+		booklet, ok := booklets[bid]
+		if !ok{
+			booklet = map[string]interface{}{
+				"positions": make(map[string]interface{}),
+			}
+			booklets[bid] = booklet
+		}
+		booklet, _ = booklets[bid]
+		booklet["positions"].(map[string]interface{})[p.Posid()] = p.Serialize()
 		numpos++
+	}	
+	for bookletid, booklet := range(booklets){
+		fmt.Println("uploading", bookletid, b.Fullname())
+		bookcoll.Doc(b.Id()).Collection("booklets").Doc(bookletid).Set(ctx, booklet)
 	}
 	elapsed := time.Since(start)
 	fmt.Println("uploading cache done", b.Fullname(), "positions", numpos, "took", elapsed)

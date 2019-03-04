@@ -152,7 +152,7 @@ func NewBook() Book{
 		Enginedepth: Envint("ENGINEDEPTH", 20),
 		Numcycles: Envint("NUMCYCLES", 10),
 		Batchsize: Envint("BATCHSIZE", 10),
-		Cutoff: Envint("CUTOFF", 500),
+		Cutoff: Envint("CUTOFF", 1000),
 		Widths: Envintarray("WIDTHS", []int{3,2,1}),
 		Poscache: make(map[string]BookPosition),
 	}

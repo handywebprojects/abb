@@ -431,11 +431,19 @@ func (b Book) SelectRecursive(fen string, depth int, line []string) string{
 	if ok{
 		mli := p.Getmovelist().Items
 		maxmoves := 1
+		if depth < len(b.Widths){
+			maxmoves = b.Widths[depth]
+		}else{
+			if len(b.Widths) > 0{
+				maxmoves = b.Widths[len(b.Widths) - 1]
+			}
+		}
 		// TODO: get maxmoves from book
 		sel := rand.Intn(maxmoves)
 		selmove := mli[sel]
 		// cutoff
 		if ( selmove.Score < -b.Cutoff ) || ( selmove.Score > b.Cutoff ){
+			fmt.Println("cutoff")
 			return ""
 		}
 		newfen := b.Makealgebmove(selmove.Algeb, fen)
@@ -519,12 +527,12 @@ func (b *Book) Minimaxrecursive(fen string, line []string, posids []string, dept
 
 func (b *Book) Minimaxout(){
 	start := time.Now()
+	fmt.Println(SEP)
 	fmt.Println("minimaxing out", b.Fullname())	
+	fmt.Println(SEP)
 	value, seldepth, nodes := b.Minimaxrecursive(b.Rootfen, []string{}, []string{}, 0, b.Analysisdepth, 0, 0, b.Cutoff)
-	fmt.Println("minimax done", -value, seldepth, nodes)
 	elapsed := time.Since(start)
-	fmt.Println("minimaxing done", b.Fullname(), "took", elapsed, "rate", float32(nodes) / float32(elapsed) * 1e9)
-	b.Uploadcache()		
+	fmt.Println("minimaxing done", b.Fullname(), -value, seldepth, nodes, "took", elapsed, "rate", float32(nodes) / float32(elapsed) * 1e9)	
 }
 
 ////////////////////////////////////////////////////////////////
