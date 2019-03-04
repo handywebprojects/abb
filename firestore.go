@@ -76,4 +76,25 @@ func StoreBookPosition(b Book, p BookPosition){
 	pc.Doc(p.Posid()).Set(ctx, p.Serialize())
 }
 
+func Synccache(b *Book){
+	b.Poscache = make(map[string]BookPosition)
+	iter := bookcoll.Doc(b.Id()).Collection("booklets").Documents(ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		piter := doc.Ref.Collection("positions").Documents(ctx)
+		for {
+			pdoc, perr := piter.Next()
+			if perr == iterator.Done {
+				break
+			}
+			blob := pdoc.Data()["blob"].(string)
+			p := BookPositionFromBlob(blob)
+			b.Poscache[p.Posid()] = p
+		}
+	}
+}
+
 ////////////////////////////////////////////////////////////////

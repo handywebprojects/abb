@@ -291,3 +291,12 @@ func (b *Board) Makealgebmove(algeb string){
 }
 
 ////////////////////////////////////////////////////////////////
+
+func (b Book) Makealgebmove(algeb string, fen string) string{
+	board := NewBoard(b.Variantkey)
+	board.Setfromfen(fen)
+	board.Makealgebmove(algeb)
+	return board.Tofen()
+}
+
+////////////////////////////////////////////////////////////////

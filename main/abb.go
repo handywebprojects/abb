@@ -12,7 +12,6 @@ func main(){
 	b.Enginedepth = 5
 	b.Store()	
 	abb.Listbooks()
-	p := b.Analyze(abb.START_FEN)
-	b.StorePosition(p)
-	fmt.Print(p)
+	b.Synccache()
+	b.Addone()
 }

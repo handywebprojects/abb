@@ -15,6 +15,7 @@ import (
 	"strings"
 	"text/scanner"
 	"math"
+	"math/rand"
 )
 
 ////////////////////////////////////////////////////////////////
@@ -416,3 +417,51 @@ func Analyze(fen string, depth int, variantkey string) BookPosition {
 
 	return p
 }
+
+////////////////////////////////////////////////////////////////
+
+func (b Book) SelectRecursive(fen string, depth int, line []string) string{
+	fmt.Println("selecting fen", depth, line, fen)
+	if depth > b.Analysisdepth{
+		fmt.Println("max depth exceeded")
+		return ""
+	}
+	p, ok := b.Getpos(fen)
+	if ok{
+		mli := p.Getmovelist().Items
+		maxmoves := 1
+		// TODO: get maxmoves from book
+		sel := rand.Intn(maxmoves)
+		selmove := mli[sel]
+		// cutoff
+		if ( selmove.Score < -b.Cutoff ) || ( selmove.Score > b.Cutoff ){
+			return ""
+		}
+		newfen := b.Makealgebmove(selmove.Algeb, fen)
+		return b.SelectRecursive(newfen, depth + 1, append(line, selmove.Algeb))
+	}else{
+		fmt.Println("selected", fen)
+		return fen
+	}
+}
+
+func (b Book) Select() string{
+	return b.SelectRecursive(b.Rootfen, 0, []string{})
+}
+
+func (b Book) Addone() string{
+	fmt.Println("add one to", b.Fullname())
+	fen := b.Select()
+	if fen == "" {
+		fmt.Println("add one failed")
+		return ""
+	}else{
+		fmt.Println("analyzing", fen)
+		p := Analyze(fen, int(b.Enginedepth), b.Variantkey)
+		fmt.Println("storing", p.Posid())
+		b.StorePosition(p)
+		return fen
+	}	
+}
+
+////////////////////////////////////////////////////////////////

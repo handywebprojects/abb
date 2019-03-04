@@ -8,6 +8,7 @@ import(
 	"fmt"
 	"strconv"
 	"strings"
+	"sort"
 
 	"cloud.google.com/go/firestore"
 )
@@ -41,10 +42,40 @@ func BookMoveFromBlob(blob string) BookMove{
 	}
 }
 
+type Movelist struct{
+	Items []BookMove
+}
+
+func (m *Movelist) Len() int{
+	return len(m.Items)
+}
+
+func (m *Movelist) Swap(i, j int){
+	m.Items[i], m.Items[j] = m.Items[j], m.Items[i]
+}
+
+func (m *Movelist) Less(i, j int) bool{
+	return m.Items[i].Eval > m.Items[j].Eval
+}
+
 type BookPosition struct{
 	Fen string
 	Enginedepth int
 	Moves map[string]BookMove
+}
+
+func (p BookPosition) Posid() string{
+	return Fen2posid(p.Fen)
+}
+
+func (p BookPosition) Getmovelist() Movelist{
+	movelist := make([]BookMove, 0)
+	for _, move := range(p.Moves){
+		movelist = append(movelist, move)
+	}
+	ml := Movelist{movelist}
+	sort.Sort(&ml)
+	return ml
 }
 
 func (p BookPosition) Serialize() map[string]interface{}{
@@ -80,10 +111,6 @@ func BookPositionFromBlob(blob string) BookPosition{
 	return p
 }
 
-func (b BookPosition) Posid() string{
-	return Fen2posid(b.Fen)
-}
-
 type Book struct{
 	Name string
 	Variantkey string
@@ -96,10 +123,19 @@ type Book struct{
 	Cutoff int
 	Widths []int	
 	Booklets *firestore.CollectionRef
+	Poscache map[string]BookPosition
+}
+
+func (b *Book) Synccache(){
+	Synccache(b)
 }
 
 func (b Book) Id() string{
 	return fmt.Sprintf("%s%s", b.Name, b.Variantkey)
+}
+
+func (b Book) Fullname() string{
+	return fmt.Sprintf("[Book %s %s]", b.Name, b.Variantkey)
 }
 
 func NewBook() Book{
@@ -114,7 +150,14 @@ func NewBook() Book{
 		Batchsize: Envint("BATCHSIZE", 10),
 		Cutoff: Envint("CUTOFF", 500),
 		Widths: Envintarray("WIDTHS", []int{3,2,1}),
+		Poscache: make(map[string]BookPosition),
 	}
+}
+
+func (b Book) Getpos(fen string) (BookPosition, bool){
+	posid := Fen2posid(fen)
+	p, ok := b.Poscache[posid]
+	return p, ok
 }
 
 func (b Book) Serialize() map[string]interface{}{
@@ -146,6 +189,7 @@ func (b Book) Analyze(fen string) BookPosition{
 }
 
 func (b Book) StorePosition(p BookPosition){
+	b.Poscache[p.Posid()] = p
 	StoreBookPosition(b, p)
 }
 
