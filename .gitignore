@@ -3,5 +3,7 @@
 
 /.vscode/*
 
+/abb
+
 *.exe
 *.bat
