@@ -75,6 +75,9 @@ func Synccache(b *Book){
 	fmt.Println(SEP)
 	b.Poscache = make(map[string]BookPosition)
 	numpos := 0
+	grandtotalblobsize := 0
+	maxnumbpos := 0
+	maxtotalblobsize := 0
 	iter := bookcoll.Doc(b.Id()).Collection("booklets").Documents(ctx)
 	for {
 		doc, err := iter.Next()
@@ -82,15 +85,27 @@ func Synccache(b *Book){
 			break
 		}		
 		positions := doc.Data()["positions"].(map[string]interface{})
+		numbpos := 0
+		totalblobsize := 0
 		for _, posdoc := range(positions){			
 			blob := posdoc.(map[string]interface{})["blob"].(string)
 			p := BookPositionFromBlob(blob)
 			b.Poscache[p.Posid()] = p
 			numpos++
+			numbpos++
+			totalblobsize += len(blob)
+			grandtotalblobsize += len(blob)
 		}		
+		fmt.Println(doc.Ref.ID, numbpos, totalblobsize)
+		if numbpos > maxnumbpos{
+			maxnumbpos = numbpos			
+		}
+		if totalblobsize > maxtotalblobsize{
+			maxtotalblobsize = totalblobsize
+		}
 	}
 	elapsed := time.Since(start)
-	fmt.Println("syncing cache done", b.Fullname(), "positions", numpos, "took", elapsed)
+	fmt.Println("syncing cache done", b.Fullname(), "positions", numpos, "took", elapsed, "average blob size", grandtotalblobsize / (numpos+1), "max positions per booklet", maxnumbpos, "max total blobsize", maxtotalblobsize)
 }
 
 func Uploadcache(b Book){
