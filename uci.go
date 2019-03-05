@@ -421,8 +421,8 @@ func Analyze(fen string, depth int, variantkey string) BookPosition {
 
 ////////////////////////////////////////////////////////////////
 
-func (b Book) SelectRecursive(fen string, depth int, line []string) string{
-	fmt.Println("selecting fen", depth, line, fen)
+func (b Book) SelectRecursive(fen string, depth int, line []string, widthbonus int) string{
+	fmt.Println(widthbonus, "selecting", depth, line)
 	if depth > b.Analysisdepth{
 		fmt.Println("max depth exceeded")
 		return ""
@@ -438,7 +438,9 @@ func (b Book) SelectRecursive(fen string, depth int, line []string) string{
 				maxmoves = b.Widths[len(b.Widths) - 1]
 			}
 		}
-		// TODO: get maxmoves from book
+		if depth < widthbonus{
+			maxmoves += ( widthbonus - depth )
+		}
 		sel := rand.Intn(maxmoves)
 		selmove := mli[sel]
 		// cutoff
@@ -447,30 +449,33 @@ func (b Book) SelectRecursive(fen string, depth int, line []string) string{
 			return ""
 		}
 		newfen := b.Makealgebmove(selmove.Algeb, fen)
-		return b.SelectRecursive(newfen, depth + 1, append(line, selmove.Algeb))
+		return b.SelectRecursive(newfen, depth + 1, append(line, selmove.Algeb), widthbonus)
 	}else{
 		fmt.Println("selected", fen)
 		return fen
 	}
 }
 
-func (b Book) Select() string{
-	return b.SelectRecursive(b.Rootfen, 0, []string{})
+func (b Book) Select(widthbonus int) string{
+	return b.SelectRecursive(b.Rootfen, 0, []string{}, widthbonus)
 }
 
 func (b Book) Addone() string{
 	fmt.Println("add one to", b.Fullname())
-	fen := b.Select()
-	if fen == "" {
-		fmt.Println("add one failed")
-		return ""
-	}else{
-		fmt.Println("analyzing", fen)
-		p := Analyze(fen, int(b.Enginedepth), b.Variantkey)
-		fmt.Println("storing", p.Posid())
-		b.StorePosition(p)
-		return fen
-	}	
+	for widthbonus := 0; widthbonus < b.Analysisdepth; widthbonus++{
+		fen := b.Select(widthbonus)
+		if fen == "" {
+			fmt.Println("add one failed with widthbonus", widthbonus)
+		}else{
+			fmt.Println("analyzing", fen)
+			p := Analyze(fen, int(b.Enginedepth), b.Variantkey)
+			fmt.Println("storing", p.Posid())
+			b.StorePosition(p)
+			return fen
+		}	
+	}
+	fmt.Println("add one failed")
+	return ""
 }
 
 ////////////////////////////////////////////////////////////////

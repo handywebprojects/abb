@@ -13,6 +13,8 @@ func main(){
 	b.Store()	
 	abb.Listbooks()
 	b.Synccache()	
+	b.Minimaxout()
+	time.Sleep(3 * time.Second)
 	for i:=0; i<b.Numcycles; i++{
 		fmt.Println(abb.SEP)
 		fmt.Println("build cycle", i+1, "of", b.Numcycles)
