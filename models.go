@@ -121,6 +121,7 @@ type Book struct{
 	Enginedepth int
 	Numcycles int
 	Batchsize int
+	Minimaxafter int
 	Cutoff int
 	Widths []int	
 	Booklets *firestore.CollectionRef
@@ -153,6 +154,7 @@ func NewBook() Book{
 		Enginedepth: Envint("ENGINEDEPTH", 20),
 		Numcycles: Envint("NUMCYCLES", 10),
 		Batchsize: Envint("BATCHSIZE", 10),
+		Minimaxafter: Envint("MINIMAXAFTER", 3),
 		Cutoff: Envint("CUTOFF", 1000),
 		Widths: Envintarray("WIDTHS", []int{3,2,1}),
 		Poscache: make(map[string]BookPosition),
@@ -175,6 +177,7 @@ func (b Book) Serialize() map[string]interface{}{
 		"enginedepth": strconv.Itoa(b.Enginedepth),
 		"numcycles": strconv.Itoa(b.Numcycles),
 		"batchsize": strconv.Itoa(b.Batchsize),
+		"minimaxafter": strconv.Itoa(b.Minimaxafter),
 		"cutoff": strconv.Itoa(b.Cutoff),
 		"widths": Intarray2str(b.Widths),
 		"booklets": b.Booklets,

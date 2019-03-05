@@ -26,6 +26,9 @@ func main(){
 			fmt.Println(abb.SEP)
 			time.Sleep(1 * time.Second)
 			b.Addone()
+			if ( j % b.Minimaxafter ) == 0{
+				b.Minimaxout()
+			}
 		}
 		b.Minimaxout()
 		b.Uploadcache()
