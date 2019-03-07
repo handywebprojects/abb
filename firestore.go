@@ -119,6 +119,7 @@ func Uploadcache(b Book){
 	fmt.Println("uploading cache", b.Fullname())	
 	fmt.Println(SEP)
 	numpos := 0
+	maxblobsize := 0
 	booklets := make(map[string]map[string]interface{})
 	for _, p := range(b.Poscache){		
 		bid := b.Bookletid(p.Fen)
@@ -130,7 +131,12 @@ func Uploadcache(b Book){
 			booklets[bid] = booklet
 		}
 		booklet, _ = booklets[bid]		
-		booklet["positions"].(map[string]interface{})[p.Posid()] = p.Serialize()
+		blob := p.Serialize()
+		booklet["positions"].(map[string]interface{})[p.Posid()] = blob
+		blobsize := len(blob["blob"].(string))
+		if blobsize > maxblobsize{
+			maxblobsize = blobsize
+		}
 		numpos++
 	}		
 	for bookletid, booklet := range(booklets){
@@ -138,7 +144,11 @@ func Uploadcache(b Book){
 		bookcoll.Doc(b.Id()).Collection("booklets").Doc(bookletid).Set(ctx, booklet)
 	}
 	elapsed := time.Since(start)
-	fmt.Println("uploading cache done", b.Fullname(), "positions", numpos, "took", elapsed)
+	fmt.Println("uploading cache done", b.Fullname(), "positions", numpos, "max blobsize", maxblobsize, "took", elapsed)
+	bookcoll.Doc(b.Id()).Update(ctx, []firestore.Update{
+		{Path: "numpos", Value: numpos},		
+		{Path: "maxblobsize", Value: maxblobsize},
+	})
 }
 
 ////////////////////////////////////////////////////////////////
