@@ -105,7 +105,12 @@ func Synccache(b *Book){
 		}
 	}
 	elapsed := time.Since(start)
-	fmt.Println("syncing cache done", b.Fullname(), "positions", numpos, "took", elapsed, "average blob size", grandtotalblobsize / (numpos+1), "max positions per booklet", maxnumbpos, "max total blobsize", maxtotalblobsize)
+	fmt.Println("syncing cache done", b.Fullname(), "positions", numpos, "took", elapsed, "average blob size", grandtotalblobsize / (numpos+1), "max positions per booklet", maxnumbpos, "max total blobsize", maxtotalblobsize)	
+	bookcoll.Doc(b.Id()).Update(ctx, []firestore.Update{
+		{Path: "numpos", Value: numpos},
+		{Path: "maxnumbpos", Value: maxnumbpos},
+		{Path: "maxtotalblobsize", Value: maxtotalblobsize},
+	})
 }
 
 func Uploadcache(b Book){

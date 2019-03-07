@@ -24,11 +24,11 @@ type BookMove struct{
 	Score int
 	Eval int
 	Minimaxdepth int
-	Hasline bool
+	Haspv int
 }
 
 func (m BookMove) Serialize() string{
-	return fmt.Sprintf("%s;%d;%d;%d;%d", m.Algeb, m.Score, m.Eval, m.Minimaxdepth, bool2int(m.Hasline))
+	return fmt.Sprintf("%s;%d;%d;%d;%d", m.Algeb, m.Score, m.Eval, m.Minimaxdepth, m.Haspv)
 }
 
 func BookMoveFromBlob(blob string) BookMove{
@@ -38,7 +38,7 @@ func BookMoveFromBlob(blob string) BookMove{
 		Score: str2int(parts[1], 0),
 		Eval: str2int(parts[2], 0),
 		Minimaxdepth: str2int(parts[3], INFINITE_MINIMAX_DEPTH),
-		Hasline: int2bool(str2int(parts[1], 0)),
+		Haspv: str2int(parts[1], 0),
 	}
 }
 

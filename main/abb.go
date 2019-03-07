@@ -14,6 +14,8 @@ func main(){
 	abb.Listbooks()
 	b.Synccache()	
 	b.Minimaxout()
+	//b.Uploadcache()
+	//return
 	time.Sleep(3 * time.Second)
 	for i:=0; i<b.Numcycles; i++{
 		fmt.Println(abb.SEP)

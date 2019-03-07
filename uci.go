@@ -412,7 +412,7 @@ func Analyze(fen string, depth int, variantkey string) BookPosition {
 			}
 		}		
 		algeb := move.BestMoves[0]
-		m := BookMove{algeb, score, score, INFINITE_MINIMAX_DEPTH, false}
+		m := BookMove{algeb, score, score, INFINITE_MINIMAX_DEPTH, 0}
 		p.Moves[algeb] = m
 	}
 
@@ -508,12 +508,13 @@ func (b *Book) Minimaxrecursive(fen string, line []string, posids []string, dept
 		// cutoff
 		algeb := mi.Algeb
 		value := mi.Score		
-		haspv := false
+		haspv := 0
+		nodesnow := nodes
 		if ( mi.Score >= -cutoff ) && ( mi.Score <= cutoff ){
 			newfen := b.Makealgebmove(algeb, fen)
 			value, seldepth, nodes = b.Minimaxrecursive(newfen, append(line, algeb), newposids, depth + 1, maxdepth, seldepth, nodes, cutoff)			
 			if value >= -INF_SCORE{
-				haspv = true
+				haspv = nodes - nodesnow
 			}
 		}
 		// failed node
@@ -525,7 +526,7 @@ func (b *Book) Minimaxrecursive(fen string, line []string, posids []string, dept
 			p.Moves[algeb] = BookMove{algeb, mi.Score, value, depth, haspv}			
 		}			
 		if depth == 0{
-			fmt.Println(algeb, mi.Score, value)	
+			fmt.Println(algeb, mi.Score, value, haspv)	
 		}		
 		if value > max{
 			max = value
