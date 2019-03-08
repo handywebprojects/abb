@@ -49,8 +49,15 @@ func NewBoard(variantkey string) Board{
 	b := Board{
 		Variantkey: variantkey,
 	}
-	b.Setfromfen(START_FEN)
+	//b.Setfromfen(START_FEN)
 	return b
+}
+
+func (b Board) copy() Board{
+	newboard := b
+	newboard.Rep = make([]Piece, len(b.Rep))
+	copy(newboard.Rep, b.Rep)
+	return newboard
 }
 
 func (b Board) Tostring() string{

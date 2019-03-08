@@ -12,8 +12,7 @@ func main(){
 	b := abb.NewBook()		
 	b.Store()	
 	abb.Listbooks()
-	b.Synccache()	
-	//b.Minimaxout()
+	b.Synccache()		
 	//b.Uploadcache()
 	//return
 	time.Sleep(3 * time.Second)

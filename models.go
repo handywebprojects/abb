@@ -61,7 +61,7 @@ func (m *Movelist) Less(i, j int) bool{
 type BookPosition struct{
 	Fen string
 	Enginedepth int
-	Moves map[string]BookMove
+	Moves []BookMove
 }
 
 func (p BookPosition) Posid() string{
@@ -93,7 +93,7 @@ func (p BookPosition) Serialize() map[string]interface{}{
 func NewPosition(fen string) BookPosition{
 	return BookPosition{
 		Fen: fen,
-		Moves: make(map[string]BookMove),
+		Moves: make([]BookMove, 0),
 	}
 }
 
@@ -103,11 +103,11 @@ func BookPositionFromBlob(blob string) BookPosition{
 	p := BookPosition{
 		Fen: parts[0],
 		Enginedepth: str2int(parts[1], 0),
-		Moves: make(map[string]BookMove),
+		Moves: make([]BookMove, 0),
 	}
 	for _, moveblob := range(moveparts){
 		m := BookMoveFromBlob(moveblob)
-		p.Moves[m.Algeb] = m
+		p.Moves = append(p.Moves, m)
 	}
 	return p
 }

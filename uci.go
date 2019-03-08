@@ -413,7 +413,7 @@ func Analyze(fen string, depth int, variantkey string) BookPosition {
 		}		
 		algeb := move.BestMoves[0]
 		m := BookMove{algeb, score, score, INFINITE_MINIMAX_DEPTH, 0}
-		p.Moves[algeb] = m
+		p.Moves = append(p.Moves, m)
 	}
 
 	return p
@@ -481,13 +481,14 @@ func (b Book) Addone() string{
 
 ////////////////////////////////////////////////////////////////
 
-func (b *Book) Minimaxrecursive(fen string, line []string, posids []string, depth int, maxdepth int, seldepth int, nodes int, cutoff int) (int, int, int){
+func (b *Book) Minimaxrecursive(board Board, line []string, posids []string, depth int, maxdepth int, seldepth int, nodes int, cutoff int) (int, int, int){
 	//fmt.Println("minimax", fen, line, posids, depth, maxdepth)
 	max := -INF_SCORE
 	// max depth exceeded
 	if depth > maxdepth{		
 		return 2 * max, seldepth, nodes
 	}
+	fen := board.Tofen()
 	posid := Fen2posid(fen)
 	// repetition
 	for _, testposid := range posids{
@@ -505,15 +506,16 @@ func (b *Book) Minimaxrecursive(fen string, line []string, posids []string, dept
 		seldepth = depth
 	}
 	nodes += 1
-	for _, mi := range p.Getmovelist().Items{		
+	for movei, mi := range p.Moves{		
 		// cutoff
 		algeb := mi.Algeb
 		value := mi.Score		
 		haspv := 0
 		nodesnow := nodes
 		if ( mi.Score >= -cutoff ) && ( mi.Score <= cutoff ){
-			newfen := b.Makealgebmove(algeb, fen)
-			value, seldepth, nodes = b.Minimaxrecursive(newfen, append(line, algeb), newposids, depth + 1, maxdepth, seldepth, nodes, cutoff)			
+			newboard := board.copy()
+			newboard.Makealgebmove(algeb)
+			value, seldepth, nodes = b.Minimaxrecursive(newboard, append(line, algeb), newposids, depth + 1, maxdepth, seldepth, nodes, cutoff)			
 			if value >= -INF_SCORE{
 				haspv = nodes - nodesnow
 			}
@@ -524,7 +526,7 @@ func (b *Book) Minimaxrecursive(fen string, line []string, posids []string, dept
 		}
 		// don't overwrite eval of low depth nodes
 		if depth < mi.Minimaxdepth{			
-			p.Moves[algeb] = BookMove{algeb, mi.Score, value, depth, haspv}			
+			p.Moves[movei] = BookMove{algeb, mi.Score, value, depth, haspv}			
 		}			
 		if depth == 0{
 			fmt.Println(algeb, mi.Score, value, haspv)	
@@ -541,7 +543,9 @@ func (b *Book) Minimaxout(){
 	fmt.Println(SEP)
 	fmt.Println("minimaxing out", b.Fullname())	
 	fmt.Println(SEP)
-	value, seldepth, nodes := b.Minimaxrecursive(b.Rootfen, []string{}, []string{}, 0, b.Analysisdepth, 0, 0, b.Cutoff)
+	board := NewBoard(b.Variantkey)
+	board.Setfromfen(b.Rootfen)
+	value, seldepth, nodes := b.Minimaxrecursive(board, []string{}, []string{}, 0, b.Analysisdepth, 0, 0, b.Cutoff)
 	elapsed := time.Since(start)
 	fmt.Println("minimaxing done", b.Fullname(), -value, seldepth, nodes, "took", elapsed, "rate", float32(nodes) / float32(elapsed) * 1e9)	
 	b.Updatefield("lastminimax", Nowutcunixdate())
