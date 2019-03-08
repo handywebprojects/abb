@@ -13,7 +13,7 @@ func main(){
 	b.Store()	
 	abb.Listbooks()
 	b.Synccache()	
-	b.Minimaxout()
+	//b.Minimaxout()
 	//b.Uploadcache()
 	//return
 	time.Sleep(3 * time.Second)
@@ -24,7 +24,9 @@ func main(){
 		time.Sleep(3 * time.Second)
 		for j:=0; j<b.Batchsize; j++{
 			fmt.Println(abb.SEP)
-			fmt.Println("batch", j+1, "of", b.Batchsize, "of build cycle", i+1, "of", b.Numcycles)
+			buildinfo := fmt.Sprintf("%s : batch %d of %d of build cycle %d of %d", abb.Nowutcunixdate(), j+1, b.Batchsize, i+1, b.Numcycles)
+			fmt.Println(buildinfo)
+			b.Updatefield("buildinfo", buildinfo)
 			fmt.Println(abb.SEP)
 			time.Sleep(1 * time.Second)
 			b.Addone()
