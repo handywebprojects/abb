@@ -471,6 +471,7 @@ func (b Book) Addone() string{
 			p := Analyze(fen, int(b.Enginedepth), b.Variantkey)
 			fmt.Println("storing", p.Posid())
 			b.StorePosition(p)
+			b.Updatefield("lastadd", Nowutcunixdate())
 			return fen
 		}	
 	}
@@ -543,6 +544,7 @@ func (b *Book) Minimaxout(){
 	value, seldepth, nodes := b.Minimaxrecursive(b.Rootfen, []string{}, []string{}, 0, b.Analysisdepth, 0, 0, b.Cutoff)
 	elapsed := time.Since(start)
 	fmt.Println("minimaxing done", b.Fullname(), -value, seldepth, nodes, "took", elapsed, "rate", float32(nodes) / float32(elapsed) * 1e9)	
+	b.Updatefield("lastminimax", Nowutcunixdate())
 }
 
 ////////////////////////////////////////////////////////////////

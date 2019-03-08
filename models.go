@@ -128,6 +128,10 @@ type Book struct{
 	Poscache map[string]BookPosition
 }
 
+func (b Book) Updatefield(key string, value string){
+	Updatebookfield(b, key, value)
+}
+
 func (b *Book) Synccache(){
 	Synccache(b)
 }

@@ -68,6 +68,12 @@ func StoreBook(b Book){
 	bd.Set(ctx, b.Serialize())
 }
 
+func Updatebookfield(b Book, key string, value string){
+	bookcoll.Doc(b.Id()).Update(ctx, []firestore.Update{
+		{Path: key, Value: value},		
+	})
+}
+
 func Synccache(b *Book){
 	start := time.Now()
 	fmt.Println(SEP)
@@ -110,6 +116,7 @@ func Synccache(b *Book){
 		{Path: "numpos", Value: numpos},
 		{Path: "maxnumbpos", Value: maxnumbpos},
 		{Path: "maxtotalblobsize", Value: maxtotalblobsize},
+		{Path: "lastsync", Value: Nowutcunixdate()},
 	})
 }
 
@@ -148,6 +155,7 @@ func Uploadcache(b Book){
 	bookcoll.Doc(b.Id()).Update(ctx, []firestore.Update{
 		{Path: "numpos", Value: numpos},		
 		{Path: "maxblobsize", Value: maxblobsize},
+		{Path: "lastupload", Value: Nowutcunixdate()},
 	})
 }
 
