@@ -60,8 +60,14 @@ func Envstr(key string, defaultvalue string) string{
 ////////////////////////////////////////////////////////////////
 
 func Fen2bookletindex(fen string, mod int) int{
+
+	parts := strings.Split(fen, " ")
+	parts[4] = "0"
+	parts[5] = "1"
+	fakefen := strings.Join(parts, " ")
+
 	sum := 0
-	for i, c := range fen{
+	for i, c := range fakefen{
 		sum += (i+1) * int(c)
 	}
 	return sum % mod
