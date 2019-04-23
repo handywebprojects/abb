@@ -430,6 +430,11 @@ func (b Book) SelectRecursive(fen string, depth int, line []string, widthbonus i
 	p, ok := b.Getpos(fen)
 	if ok{
 		mli := p.Getmovelist().Items
+		mlilen := len(mli)
+		if mlilen == 0{
+			fmt.Println("no moves")
+			return ""
+		}
 		maxmoves := 1
 		if depth < len(b.Widths){
 			maxmoves = b.Widths[depth]
@@ -440,6 +445,9 @@ func (b Book) SelectRecursive(fen string, depth int, line []string, widthbonus i
 		}
 		if depth < widthbonus{
 			maxmoves += ( widthbonus - depth )
+		}
+		if maxmoves > mlilen{
+			maxmoves = mlilen
 		}
 		sel := rand.Intn(maxmoves)
 		selmove := mli[sel]
